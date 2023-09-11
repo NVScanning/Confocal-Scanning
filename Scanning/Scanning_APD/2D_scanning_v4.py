@@ -107,7 +107,7 @@ class ScannerApp(tk.Tk):
         self.line_graph_frame = ttk.Frame(self)
         self.line_graph_frame.grid(row=0, column=2, rowspan=2 ,sticky='nsew')
         # Put the line graph in the frame
-        self.fig2, self.ax = plt.subplots()
+        self.fig2, self.ax2 = plt.subplots()
         self.canvas2 = FigureCanvasTkAgg(self.fig2, master=self.line_graph_frame)
         self.canvas2.draw()
         self.canvas2.get_tk_widget().pack(fill=tk.BOTH, expand=False)
@@ -216,27 +216,31 @@ class ScannerApp(tk.Tk):
         res_handles = job.result_handles
         counts_handle = res_handles.get("counts")
         counts_handle.wait_for_values(1)
-        time = []
+        Time = []
         counts = []
         
         while(self.scanning == True):
-            print("starting time trace")
             new_counts = counts_handle.fetch_all() 
             counts.append((new_counts["value"] / (single_integration_time_ns / 1000000000)) /1000 )
-            time.append(new_counts["timestamp"])  # Convert timestams to seconds
+            Time.append(new_counts["timestamp"])  # Convert timestams to seconds
             print(new_counts)
-            plt.cla()
-            if len(time) > 300:
-                plt.plot(time[-300:], counts[-300:])
+            self.ax2.cla()
+            #self.canvas2.draw_idle()
+            #self.update_idletasks() 
+            #time.sleep(0.1)
+            if len(Time) > 300:
+                self.ax2.plot(Time[-300:], counts[-300:])
             else:
-                plt.plot(time, counts)
+                self.ax2.plot(Time, counts)
 
             plt.xlabel("time [s]")
             plt.ylabel("counts [kcps]")
             plt.title("Counter")
-            self.canvas2.draw()    
-    
-    
+            self.canvas2.draw_idle()
+            self.update_idletasks() 
+            time.sleep(0.5)
+            
+     
     def start_scan(self):
         
         # Start a new thread for scanning
